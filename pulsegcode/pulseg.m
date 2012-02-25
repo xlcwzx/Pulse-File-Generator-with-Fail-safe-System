@@ -1,0 +1,100 @@
+function pulseg(mode,x)
+% PULSEG（MODE,X）产生给定脉冲，支持两种模式
+% 第一个参数是模式，从‘T’和‘C’中选择
+% 第二个参数是一维数组
+% 模式‘T’：[起始时刻，持续时间]
+% 模式‘C’：[持续时间，电坪（高：1，低：0）]
+
+if mode ~= 'T' && mode ~= 'C'
+    error(' choose from mode T and C!');
+end
+if isnumeric(x) == 0
+    error('must be a numerical array!');
+end
+if nargin ~= 2
+    error('should provide two variables!');
+end
+if(mod(length(x),2) ~= 0)
+    error('input array must have an even number of elements!');
+end
+
+if mode == 'T'
+
+%检查起始时刻是否按照时间流逝顺序给定    
+for k=2:length(x)/2
+    if x(2*k-1) < x(2*k-3)
+        error('time order must be ascending!');
+    end
+end
+
+%检查给定的各脉冲是否重叠
+for k=2:length(x)/2
+    if x(2*k-1) <= (x(2*k-3) + x(2*k-2) - 1)
+        error('Overlap!');
+    end
+end
+
+%定义输出脉冲数组，起始全0，最终输出结果将在末尾补5个0
+y=zeros(1,x(length(x)) + x(length(x)-1) + 5);
+
+%在脉冲持续时间内将0置为1
+for k = 1:length(x)/2
+    for j = 1:x(2*k)
+        y(x(2*k-1) + j) = 1;
+    end
+end
+
+%按照给定格式输出
+fid=fopen('data_T.txt','wt');
+fprintf(fid,'%d:\n',x(1));
+for k=1:length(x)/2-1
+    fprintf(fid,'%d:   MW\n',x(2*k));
+    fprintf(fid,'%d:\n',x(2*k+1)-x(2*k)-x(2*k-1));
+end
+fprintf(fid,'%d:   MW\n',x(length(x)));
+fprintf(fid,'%d ',y);
+fclose(fid);
+
+elseif mode == 'C'
+     %检查给定的电坪参数是否有效
+    for k = 1:length(x)/2
+        if x(2*k) ~= 0 && x(2*k) ~= 1
+            error('must provided 0 or 1!');
+        end
+    end
+    
+    %定义输出脉冲数组，起始全0，最终输出结果将在末尾补5个0
+    sum = 0;
+    for k = 1:length(x)/2
+        sum = sum + x(2*k-1);
+    end
+    y = zeros(1,sum + 5);
+    
+    %根据给定的电坪参数在规定区间置1
+    sumx = 0;
+    for k=1:length(x)/2
+        for j=1:x(2*k-1)
+            y(sumx + j) = x(2*k);
+        end
+        sumx = sumx + x(2*k-1);
+    end
+    
+    %按照给定格式输出
+    fid=fopen('data_C.txt','wt');
+    for k=1:length(x)/2
+      if(x(2*k)==1)
+        fprintf(fid,'%d:   MW\n',x(2*k-1));
+    else
+        fprintf(fid,'%d:\n',x(2*k-1));
+      end
+    end
+   fprintf(fid,'%d ',y);
+   fclose(fid); 
+
+end
+
+
+
+
+    
+    
