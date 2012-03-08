@@ -1,10 +1,14 @@
-function pulseg(mode,x)
-% PULSEG（MODE,X）产生给定脉冲，支持两种模式
-% 第一个参数是模式，从‘T’和‘C’中选择
-% 第二个参数是一维数组
-% 模式‘T’：[起始时刻，持续时间]
-% 模式‘C’：[持续时间，电坪（高：1，低：0）]
+function y=pulseg(mode,x)
+% PULSEG（MODE,X）generate pulse sequence, support two modes
+% the first parameter is mode,choose from 'T' and 'C'
+% the second parameter is 1D numerical array
+% the third parameter is the longest length of all input pulse sequences 
+% Mode 'T':[starting time, sequence duration]
+% Mode 'C':[sequence duration,electric Ping(high:1,low:0)]
+% it needs global variables AHEADT and Lengthmax
+% LENGTHMAX:the longest length of all input pulse sequences
 
+global LENGTHMAX;
 if mode ~= 'T' && mode ~= 'C'
     error(' choose from mode T and C!');
 end
@@ -20,31 +24,39 @@ end
 
 if mode == 'T'
 
-%检查起始时刻是否按照时间流逝顺序给定    
+
+%check the time order   
 for k=2:length(x)/2
     if x(2*k-1) < x(2*k-3)
         error('time order must be ascending!');
     end
 end
 
-%检查给定的各脉冲是否重叠
+%check if the sequence is overlapped
 for k=2:length(x)/2
     if x(2*k-1) <= (x(2*k-3) + x(2*k-2) - 1)
         error('Overlap!');
     end
 end
 
-%定义输出脉冲数组，起始全0，最终输出结果将在末尾补5个0
-y=zeros(1,x(length(x)) + x(length(x)-1) + 5);
+%define output array
+y=zeros(1,LENGTHMAX);
 
-%在脉冲持续时间内将0置为1
+%set the output 1 as the electric Ping is high
 for k = 1:length(x)/2
     for j = 1:x(2*k)
         y(x(2*k-1) + j) = 1;
     end
 end
 
-%按照给定格式输出
+%set the last output 0 if the sequence is not the longest
+if x(length(x)-1)+x(length(x))<LENGTHMAX
+    for i=x(length(x)-1)+x(length(x))+1:LENGTHMAX
+        y(i)=0;
+    end
+end
+
+%set the output in a given mannar
 fid=fopen('data_T.txt','wt');
 fprintf(fid,'%d:\n',x(1));
 for k=1:length(x)/2-1
@@ -56,21 +68,30 @@ fprintf(fid,'%d ',y);
 fclose(fid);
 
 elseif mode == 'C'
-     %检查给定的电坪参数是否有效
+    
+    
+    %check the effectiveness of given electric Ping
     for k = 1:length(x)/2
         if x(2*k) ~= 0 && x(2*k) ~= 1
             error('must provided 0 or 1!');
         end
     end
     
-    %定义输出脉冲数组，起始全0，最终输出结果将在末尾补5个0
+    %define output array
+    y = zeros(1,LENGTHMAX);
+   
+    %set the last output 0 if the sequence is not the longest 
     sum = 0;
     for k = 1:length(x)/2
         sum = sum + x(2*k-1);
     end
-    y = zeros(1,sum + 5);
+   if sum<LENGTHMAX
+      for i=sum+1:LENGTHMAX
+        y(i)=0;
+      end
+  end
     
-    %根据给定的电坪参数在规定区间置1
+    %set output 1 according to the electric Ping
     sumx = 0;
     for k=1:length(x)/2
         for j=1:x(2*k-1)
@@ -79,7 +100,7 @@ elseif mode == 'C'
         sumx = sumx + x(2*k-1);
     end
     
-    %按照给定格式输出
+    %set the output in a given mannar
     fid=fopen('data_C.txt','wt');
     for k=1:length(x)/2
       if(x(2*k)==1)
