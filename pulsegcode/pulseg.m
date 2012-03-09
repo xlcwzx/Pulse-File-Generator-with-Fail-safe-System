@@ -56,17 +56,6 @@ if x(length(x)-1)+x(length(x))<LENGTHMAX
     end
 end
 
-%set the output in a given mannar
-fid=fopen('data_T.txt','wt');
-fprintf(fid,'%d:\n',x(1));
-for k=1:length(x)/2-1
-    fprintf(fid,'%d:   MW\n',x(2*k));
-    fprintf(fid,'%d:\n',x(2*k+1)-x(2*k)-x(2*k-1));
-end
-fprintf(fid,'%d:   MW\n',x(length(x)));
-fprintf(fid,'%d ',y);
-fclose(fid);
-
 elseif mode == 'C'
     
     
@@ -98,19 +87,7 @@ elseif mode == 'C'
             y(sumx + j) = x(2*k);
         end
         sumx = sumx + x(2*k-1);
-    end
-    
-    %set the output in a given mannar
-    fid=fopen('data_C.txt','wt');
-    for k=1:length(x)/2
-      if(x(2*k)==1)
-        fprintf(fid,'%d:   MW\n',x(2*k-1));
-    else
-        fprintf(fid,'%d:\n',x(2*k-1));
-      end
-    end
-   fprintf(fid,'%d ',y);
-   fclose(fid); 
+    end 
 
 end
 
