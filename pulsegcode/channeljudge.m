@@ -6,9 +6,6 @@ if x==2
     y='MW_PROT,';
 end
 if x==3
-   y='  RF,   ';
-end
-if x==4
-    y='RF_PROT ';
+   y='  RF    ';
 end
 end

@@ -18,7 +18,6 @@ fid=fopen('pulsepieces.txt','wt');
 fprintf(fid,'Channel MW     =1\n');
 fprintf(fid,'Channel MW_PROT=2\n');
 fprintf(fid,'Channel RF     =3\n');
-fprintf(fid,'Channel RF_PROT=4\n');
 fprintf(fid,'\n');
 
 %the length of one certain piece

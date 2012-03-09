@@ -1,12 +1,11 @@
 function  pulsecontrol(pulsenumMW,pulsenumRF)
-%NVPULSE(pulsenumMW,pulsenumRF) is a function to generate needed pulse sequences
+%PULSECONTROL(pulsenumMW,pulsenumRF) is a function to generate needed pulse sequences
 %there are some global variables:
 %AHEADT: the time needed before the protected pulse
 %ENDT:the time needed after the protected pulse
 %LENGTHMAX:the longest length of all input pulse sequences
 %the parameter pulsenum means the input pulse sequence number
-%needed,it is integer and do not include the supplementary pulse 
-%such as the protecting pulse
+%needed,it is integer and can be chosen from 0 and 1
 
 global LENGTHMAX;
 global PULSEDELAY;
@@ -46,16 +45,6 @@ end
 %pulseRF
 if pulsenumRF==1
     x=input('Please input RF pulse sequence according to the mode you selected.\n');
-     if mode=='C'
-       if x(1)<AHEADT||x(2)==1
-           PULSEDELAY=AHEADT;
-       end
-     end
-   if mode=='T'
-       if x(1)<AHEADT
-          PULSEDELAY=AHEADT; 
-       end
-   end
     pulseaccarray(pulsenumRF+pulsenumMW,:)=pulseg(mode,x);
 end
 
@@ -74,16 +63,11 @@ end
 
 %set the length of pulse sequences after considering the protecting pulse
 prolength=length(pulsegp(pulsegccarray(1,:)));
-for j=1:pulsenumRF+pulsenumMW
-    if prolength<length(pulsegp(pulsegccarray(j,:)))
-        prolength=length(pulsegp(pulsegccarray(j,:)));
-    end
-end
 
 %put all sequences including supplementary ones into an array with the same
 %length
-pulsesequence=zeros((pulsenumMW+pulsenumRF)*2,prolength);
-for j=1:pulsenumMW+pulsenumRF
+pulsesequence=zeros(pulsenumMW*2+pulsenumRF,prolength);
+for j=1:pulsenumMW
     for i=1:LENGTHMAX+PULSEDELAY
     pulsesequence(2*j-1,i)=pulsegccarray(j,i);
     end
@@ -91,6 +75,9 @@ for j=1:pulsenumMW+pulsenumRF
     y=pulsegp(pulsegccarray(j,:));
     pulsesequence(2*j,i)=y(i);
     end
+end
+for i=1:LENGTHMAX+PULSEDELAY
+    pulsesequence(2*pulsenumMW+1,i)=pulsegccarray(pulsenumMW+pulsenumRF,i);
 end
 
 %cut those sequences into pieces
