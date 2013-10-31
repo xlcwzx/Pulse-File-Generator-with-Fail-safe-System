@@ -36,7 +36,7 @@ if pulsenumMW==1
    end
    if mode=='T'
        if x(1)<AHEADT
-          PULSEDELAY=AHEADT; 
+          PULSEDELAY=AHEADT;
        end
    end
    pulseaccarray(pulsenumMW,:)=pulseg(mode,x);    
