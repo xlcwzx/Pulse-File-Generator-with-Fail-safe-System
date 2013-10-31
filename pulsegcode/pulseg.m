@@ -89,10 +89,4 @@ elseif mode == 'C'
         sumx = sumx + x(2*k-1);
     end 
 
-end
-
-
-
-
-    
-    
+end 
